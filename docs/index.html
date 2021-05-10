@@ -70,9 +70,49 @@
         Basin</a> helped guide the governing equations we used for particle dynamics, and the overall structure of the waterfall. In particular, the 
       waterfall was divided up into a water stream, splashing spray, and spray cloud. Each of these components had different physical dynamics. </p>
 
-        <p>For the water stream, we used Navier-Stokes to determine the acceleration of the falling particle. \[\frac{\partial u}{\partial t} = -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
-          Here u is velocity, t is time, \{\rho}\  is  </p>
+        <p>For the <b>water stream</b>, we used Navier-Stokes to determine the acceleration of the falling particle. \[\frac{\partial u}{\partial t} = -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
+          Here u is velocity, t is time, \(\rho\) is density, p is pressure, v is viscosity and f is external acceleration. </p>
+        <p>A physical quanitity (i.e. density, pressure, viscosity) \(\phi (x_i)\), its gradient \(\nabla \phi (x_i)\), and its laplacian \(\nabla^2\phi (x_i)\) are calculated as follows:
+          \[\phi (x_i)\ = \sum_{j} m_j \frac{\phi}{\rho_j} W(x_i - x_j)\] 
+          \[\nabla \phi (x_i)\ = \sum_{j} m_j \frac{\phi}{\rho_j}\nabla W(x_i - x_j)\] 
+          \[\nabla^2 \phi (x_i)\ = \sum_{j} m_j \frac{\phi_j - \phi_j}{\rho_j} \frac{x_j - x_i}{|x_j - x_i|} \nabla W(x_i - x_j)\]
+          where \(m_j\) is the mass, \(\rho_j\) is the density, and \(x_j\) is the position for a particle j. 
+          <p>\(W\) is the kernel function, and \(\nabla W \) is its gradient defined by:</p>
+          
+          \[W(r,h) =
+                   \frac{315}{64\pi h^9} \begin{cases}
+                            (h^2-r^2)^3,  & \text{if $0 \le r \le h$} \\
+                            0, & \text{otherwise}
+                            \end{cases}\]
+
+          \[\nabla W(r,h) =
+          \frac{45}{\pi h^4} \begin{cases}
+                    (h-r)^2,  & \text{if $0 \le r \le h$} \\
+                    0, & \text{otherwise}
+                    \end{cases}\]                  
+
+          <p>
+          Gravity and air resistance are considered when computing the external acceleration f and can be computed as:
+          \[f = g + \frac{1}{\rho_p V_p}F_{air}\]
+          \[F_{air} = \frac{1}{2} \pi (\frac{D_p}{2})^2 \rho_a C_r |u_p| u_p\]
+
+          g is gravity, \(\rho_p\), \(V_p\), \(D_p\), and \(u_p\) are the density, volume, diameter, and velocity of a particle. \(\rho_a\) and \(C_r\) are the density of air 
+          and coefficient of air resistance. </p>
+
+
+        </p>
+
     <h4 align="middle">Optimization</h4>
+    <p>One challenge with this project was ensuring that the simulation calculations were computed quickly. We utilized OpenMP to speed up parallelizable sections
+      of the code.</p>
+
+    <p>The Navier Stokes equation requires knowledge of the neighboring particles within a specified neighborhood radius for each particle. Initially we utilized
+      the CompactNSearch library for neighborhood search, but found that it was too computationally expensive. It would crash our machines if ran in conjunction with 
+      the navier stokes computation. Thinking back to project 4, we looked into devising a spatial hashing approach. However, we found that it would be too inaccurate for 
+      our purposes so we utilized a method from ___.
+    </p>
+
+
 
     <h4 align="middle">Surface Reconstruction</h4>
 
@@ -82,19 +122,10 @@
     
     <h3 align="middle"><i>Results</i></h3>
     <h3 align="middle"><i>References</i></h3>
+    <h3 align="middle"><i>Lessons Learned</i></h3>
 
     <h3 align="middle"><i>Team Member Contributions</i></h3>
-        <p></p>
-    
-    <h3 align="middle"><i>Technical Approach</i></h3>
-    
 
-    
-
-
-   
-    
-    
 </body>
 </html>
 
