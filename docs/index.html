@@ -63,23 +63,20 @@
       </p>
       
     <h3 align="middle"><i>Technical Approach</i></h3>
-    <p>We based our code off of Project 4. The first step we took was isolate each of the individual pointmasses.</p>
+    <p>We used the Project 4 codebase as a starting point because it was nice to have an existing class hierarchy and GUI setup. From there, we updated the simulator and pointmass classes to implement the physics described below. </p>
     <h4 align="middle">Smoothed Particle Hydrodynamics (SPH) </h4>
-    <p>For the simulation, we need to calculate the position of each particle at each time step. 
-      The paper <a href="https://www.scitepress.org/papers/2018/68965/68965.pdf">Particle based Waterfall Simulation with Spray Cloud Emerging from
-        Basin</a> <b>[1]</b> helped guide the governing equations we used for particle dynamics, and the overall structure of the waterfall. In particular, the 
-      waterfall was divided up into a water stream, splashing spray, and spray cloud, each with their own different physical dynamics. In the time frame of this project, we were only able to implement the equations for water stream and spray cloud.</p>
-
-        <p>For the <b>water stream</b>, we used Navier-Stokes to determine the acceleration of the falling particle. \[\frac{\partial u}{\partial t} = -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
+    <p>In implementing proper particle dynamics for water, we used the paper <a href="https://www.scitepress.org/papers/2018/68965/68965.pdf">Particle based Waterfall Simulation with Spray Cloud Emerging from Basin</a> <b>[1]</b> as a guide. Their approach divides the waterfall up into a main water stream, splashing spray particles, and spray cloud particles, each with their own dynamics. In the time frame of this project, we were only able to implement the equations for water stream and spray cloud.</p>
+        <br>
+        <p><i>Water Stream:</i> For these particles, we used Navier-Stokes to determine their acceleration. \[\frac{\partial u}{\partial t} = -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
           Here \(u\) is velocity, \(t\) is time, \(\rho\) is density, \(p\) is pressure, \(v\) is viscosity and \(f\) is external acceleration. \(\nabla p\) represents the force density field due to pressure, \(v \nabla^2 u \) represents the force density field due to viscosity, and \(f\) represents external forces such as gravity, air resistance, or user interaction. In our case, we are simply using gravity. </p>
 
-        <p>As part of SPH, each physical quanitity (i.e. density, pressure field, viscosity field) corresponding to an individual particle varies with time based on its neighbouring particles. The equations we use to calculate them follows <b>[2]</b>, which includes slight modifications to the traditional SPH quantity updates in order to make the forces symmetrical. These are defined as follows, where j denotes a neighboring particle of i:
+        <p>As part of SPH, each physical quanitity (i.e. density, pressure field, viscosity field) corresponding to an individual particle varies with time based on its neighbouring particles. The equations we use to calculate them follows <b>[2]</b>, which includes slight modifications to the traditional SPH quantity updates in order to make the forces symmetrical. These are defined as follows, where <i>j</i> denotes a neighboring particle of <i>i</i>:
 
           \[\rho(x_i) = \sum_{j} m_jW(x_i-x_j, h)\]
             \[\nabla p(x_i) = \sum_{j}m_j\frac{p_i + p_j}{2\rho_j}\nabla W(x_i-x_j, h)\] 
-            \[\nabla u^2(x_i) = \sum_{j} m_j \frac{v_j - v_i}{\rho_j} \nabla^2 W(x_i-x_j, h)\]
+            \[\nabla^2 u(x_i) = \sum_{j} m_j \frac{u_j - u_i}{\rho_j} \nabla^2 W(x_i-x_j, h)\]
 
-          As this summation of neighbors for each particle introduces a major computational bottleneck, we attempt a method of optimizing neighborhood search which is detailed in the optimization section below. 
+          The first equation should be evaluated before the latter two because of the dependence on density. As this summation of neighbors for each particle introduces a major computational bottleneck, we optimize neighborhood search as detailed in the optimization section below. 
           <p>\(W\) corresponds to a kernel smoothing function, of which there are many possible choices. For our project, we use the kernels defined in <b>[2]</b> based on their reported success and popularity, with a slight modification to the gradient kernel based on <b>[3]</b> that we found to produce more numerically stable results for our particular scene setups. </p>
           
           \[W(r,h) =
@@ -110,8 +107,17 @@
 
 
         </p>
+        <p>
+          Also note that a particle's pressure \(p_i\) needs to be given a value before we can update the pressure field. As suggested by [2], we use the ideal gas state equation
 
-        <p>For the <b>spray cloud</b> particles, we use a modified Navier-Stokes as follows:
+          \[
+            p = k\rho
+          \]
+
+          in order to calculate a particle's pressure at each time step. Although they also suggest to offset this pressure by an initial density, we found that it was less numerically stable in practice then simply using the equation above.
+        </p>
+        <br>
+        <p><i>Spray Cloud:</i> When a stream particle hits the basin, we generate a spray cloud particle with a random initial velocity in the reflected direction. For these particles, we update their velocities using a modified Navier-Stokes as is done in [1]:
           
           \[\frac{\partial u}{\partial t} = -(u \cdot \nabla) u  -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
           
@@ -161,17 +167,15 @@
 
     <h4 align="middle">SPH Implementation and Stability</h4>
     <p>
-      The description of Navier-Stokes in the waterfall specific reference <b>[1]</b> was slightly ambiguous in terms of implementation, possibly because the intended audience has a greater familiarity with fluid simulations. As such, we turned to many other works in the field of general particle-based fluid simulation such as <b>[2]</b>, <b>[3]</b>, <b>[6]</b>, and <b>[7]</b> to better understand the equations and how others go about implementing them. In these works, the implementations vary in many ways (e.g. the kernel function, the pressure/viscosity dynamics), leading us to experiment with various configurations. Through trial and error, we found that a mix of features from each of these works gave us the best visual effects within the context of our scene, as opposed to the full configuration from any single paper (which would often lead to numeric instability and wild particle trajectories). However, we would have liked to see whether any individual work's full configuration could have been made to work with more time to debug and tweak parameter, so this remains an interesting future line of investigation. 
+      The description of Navier-Stokes in the waterfall specific reference <b>[1]</b> was slightly ambiguous in terms of implementation, possibly because the intended audience has a greater familiarity with fluid simulations. As such, we turned to many other works in the field of general particle-based fluid simulation such as <b>[2]</b>, <b>[3]</b>, <b>[6]</b>, and <b>[7]</b> to better understand the equations and how others go about implementing them. In these works, the implementations vary in many ways (e.g. the kernel function, the pressure/viscosity numerical calculation), leading us to experiment with various configurations. Through trial and error, we found that the mix of features from each of these works described earlier gave us the best visual effects within the context of our scene. However, we would have liked to see whether any individual work's full configuration could have been made to produce even better results with more time to debug and tweak parameter, so this remains an interesting future line of investigation. 
     </p>
     
     <h3 align="middle"><i>Results</i></h3>
     
     </p>
     <h3 align="middle"><i>Lessons Learned</i></h3>
-    <p>It was interesting to take what we learned from the cloth simulation project and expand upon it by implementing ideas from literature. We were able to peek even further behind the layers of abstraction in the 
-      codebase to implement what we wanted. While researching the various methods, we practiced the skill of deciphering papers and gained a deeper understanding of the physics behind how fluids work in the physical world. 
-      We also had to deal with ambiguities in the paper so that we could use the methods in our scenario, which required a lot of communication between the group members. Overall, we learned the complexities that go into creating a 
-      realistic waterfall simulation, especially in the surface reconstruction component. 
+    <p>It was interesting to take the high level concepts we learned from the cloth simulation project and apply it to simulating fluid particles with help from the literature. While researching the various methods, we learned how to better decipher papers in order to deal with amibguities and left-out details. In the process, we gained a better understanding of the physics behind fluids work and appreciation for how sensitive the computational parameters need to be in order for the simulation to work properly.  Overall, we learned that there are a lot of complexities that go into creating a realistic waterfall simulation, and would love investigate the open-ends of our project further when we have more time.
+
     </p>
     <h3 align="middle"><i>Team Member Contributions</i></h3>
     <p>Amal Mehta: reading papers to find pertinent information for the project, implementing the optimization components, writing the final report and website.</p>
