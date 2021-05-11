@@ -103,6 +103,13 @@
 
         </p>
 
+        <p>For the <b>spray cloud</b>, we modified the Navier-Stokes as follows:
+          
+          \[\frac{\partial u}{\partial t} = -(u \cdot \nabla) u  -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
+          
+          \[\nabla \cdot u = 0\]
+         </p>
+
     <h4 align="middle">Optimization</h4>
     <p>One challenge with this project was ensuring that the simulation calculations were computed quickly. We utilized OpenMP to speed up parallelizable sections
       of the code.</p>
@@ -120,7 +127,7 @@
         a point and a grid cell to be \[d = \sqrt{\max(0, |x| -1)^2 + \max(0, |y|-1)^2 + \max(0, |z| - 1)^2} \] for a point with coordinates x, y, z. 
      </p>
 
-     <p>Another method we t4ried</p>
+     <!--<p>Another method we tried</p> Jason, you can add the other method here if you want -->
 
     <h4 align="middle">Surface Reconstruction</h4>
 
