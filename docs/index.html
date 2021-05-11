@@ -71,16 +71,16 @@
       waterfall was divided up into a water stream, splashing spray, and spray cloud. Each of these components had different physical dynamics. </p>
 
         <p>For the <b>water stream</b>, we used Navier-Stokes to determine the acceleration of the falling particle. \[\frac{\partial u}{\partial t} = -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
-          Here u is velocity, t is time, \(\rho\) is density, p is pressure, v is viscosity and f is external acceleration. \nabla p represents the force density field due to pressure, v \nalbda^2 u represents the force density field due to viscosity, and f represents external forces such as gravity, air resistance, or user interaction. In our case, we are simply using gravity. </p>
+          Here \(u\) is velocity, \(t\) is time, \(\rho\) is density, \(p\) is pressure, \(v\) is viscosity and \(f\) is external acceleration. \(\nabla p\) represents the force density field due to pressure, \(v \nabla^2 u \) represents the force density field due to viscosity, and \(f\) represents external forces such as gravity, air resistance, or user interaction. In our case, we are simply using gravity. </p>
 
-        <p>As part of SPH, Each physical quanitity (i.e. density, pressure field, viscosity field) corresponding to an individual particle varies with time based on its neighbouring particles. The equations we use to calculate them follows [3], which includes slight modifications to the traditional SPH quantity updates in order to make the forces symmetrical. These are defined as follows, where j denotes a neighboring particle of i:
+        <p>As part of SPH, each physical quanitity (i.e. density, pressure field, viscosity field) corresponding to an individual particle varies with time based on its neighbouring particles. The equations we use to calculate them follows <b>[2]</b>, which includes slight modifications to the traditional SPH quantity updates in order to make the forces symmetrical. These are defined as follows, where j denotes a neighboring particle of i:
 
           \[\rho(x_i) = \sum_{j} m_jW(x_i-x_j, h)\]
             \[\nabla p(x_i) = \sum_{j}m_j\frac{p_i + p_j}{2\rho_j}\nabla W(x_i-x_j, h)\] 
             \[\nabla u^2(x_i) = \sum_{j} m_j \frac{v_j - v_i}{\rho_j} \nabla^2 W(x_i-x_j, h)\]
 
           As this summation of neighbors for each particle introduces a major computational bottleneck, we detail our method of neighborhood search in the optimization section below. 
-          <p>\(W\) corresponds to a kernel smoothing function, of which there are many possible choices. For our project, we use the kernels defined in [3] based on their reported success and popularity, with a slight modification to the gradient kernel based on [4] that we found to produce more numerically stable results for our particular scene setups. </p>
+          <p>\(W\) corresponds to a kernel smoothing function, of which there are many possible choices. For our project, we use the kernels defined in <b>[2]</b> based on their reported success and popularity, with a slight modification to the gradient kernel based on <b>[3]</b> that we found to produce more numerically stable results for our particular scene setups. </p>
           
           \[W(r,h) =
                    \frac{315}{64\pi h^9} \begin{cases}
@@ -101,11 +101,11 @@
                     \end{cases}\]                   
 
           <p>
-          Gravity and air resistance are considered when computing the external acceleration f and can be computed as:
+          Gravity and air resistance are considered when computing the external acceleration \(f\) and can be computed as:
           \[f = g + \frac{1}{\rho_p V_p}F_{air}\]
           \[F_{air} = \frac{1}{2} \pi (\frac{D_p}{2})^2 \rho_a C_r |u_p| u_p\]
 
-          g is gravity, \(\rho_p\), \(V_p\), \(D_p\), and \(u_p\) are the density, volume, diameter, and velocity of a particle. \(\rho_a\) and \(C_r\) are the density of air 
+          \(g\) is gravity, \(\rho_p\), \(V_p\), \(D_p\), and \(u_p\) are the density, volume, diameter, and velocity of a particle. \(\rho_a\) and \(C_r\) are the density of air 
           and coefficient of air resistance. </p>
 
 
@@ -135,13 +135,13 @@
       the CompactNSearch library for neighborhood search, but found that it was too computationally expensive. It would crash our machines if ran in conjunction with 
       the navier stokes computation. Thinking back to project 4, we looked into devising a spatial hashing approach. We found that it would be too inaccurate for 
       our purposes to use vanilla spatial hashing from project 4 so we utilized a method from <a href="https://cs.nyu.edu/~jihun/paper/sca2010.pdf">Reconstructing Surfaces of Particle-Based Fluids
-        Using Anisotropic Kernels</a> <b>[2]</b>. The method works by computing an axis aligned bounding box for the ellipsoid associated with each particle. The ellipsoid is 
+        Using Anisotropic Kernels</a> <b>[4]</b>. The method works by computing an axis aligned bounding box for the ellipsoid associated with each particle. The ellipsoid is 
         calculated using an anisotropic kernel. The scene space is divided into grid cells (number and size of grid cells determined by a constant parameter). Whichever cells the bounding box intersects 
         are the ones the particle is mapped to in the spatial hashmap. Our hash functions hashes the grid cell which contains the particle with a linear formula 
         using large prime coefficients to avoid collisions.</p>
      <p>   
         Prior to implementing the ansiotropic kernel and constructing the bounding box, we used a sphere instead of the ellipsoid in order to get something up and running quickly. We computed the distance between 
-        a point and a grid cell to be \[d = \sqrt{\max(0, |x| -1)^2 + \max(0, |y|-1)^2 + \max(0, |z| - 1)^2} \] for a point with coordinates x, y, z. 
+        a point and a grid cell to be \[d = \sqrt{\max(0, |x| -1)^2 + \max(0, |y|-1)^2 + \max(0, |z| - 1)^2} \] for a point with coordinates \(x\), \(y\), \(z\). 
      </p>
 
      <!--<p>Another method we tried</p> Jason, you can add the other method here if you want -->
@@ -171,10 +171,10 @@
     <p>Srikar Boinapally: </p>
 
     <h3 align="middle"><i>References</i></h3>
-    <p>[1]: https://www.scitepress.org/papers/2018/68965/68965.pdf</p>
-    <p>[2]: https://cs.nyu.edu/~jihun/paper/sca2010.pdf </p>
-    <p>[3]: https://matthias-research.github.io/pages/publications/sca03.pdf</p>
-    <p>[4]: https://elrnv.com/cs888/cs888proj.pdf</p>
+    <p><b>[1]</b>: https://www.scitepress.org/papers/2018/68965/68965.pdf</p>
+    <p><b>[2]</b>: https://matthias-research.github.io/pages/publications/sca03.pdf</p>
+    <p><b>[3]</b>: https://elrnv.com/cs888/cs888proj.pdf</p>
+    <p><b>[4]</b>: https://cs.nyu.edu/~jihun/paper/sca2010.pdf </p>
     <p>We started from the project 4 skeleton, which can be found here: <a href="https://github.com/cal-cs184-student/p4-clothsim-sp21-alexbuckley4">Project 4 Skeleton</a></p>
 </body>
 </html>
