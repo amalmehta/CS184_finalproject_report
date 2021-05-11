@@ -67,7 +67,7 @@
     <h4 align="middle">Smoothed Particle Hydrodynamics (SPH) </h4>
     <p>For the simulation, we need to calculate the position of each particle at each time step. 
       The paper <a href="https://www.scitepress.org/papers/2018/68965/68965.pdf">Particle based Waterfall Simulation with Spray Cloud Emerging from
-        Basin</a> helped guide the governing equations we used for particle dynamics, and the overall structure of the waterfall. In particular, the 
+        Basin</a> <b>[1]</b> helped guide the governing equations we used for particle dynamics, and the overall structure of the waterfall. In particular, the 
       waterfall was divided up into a water stream, splashing spray, and spray cloud. Each of these components had different physical dynamics. </p>
 
         <p>For the <b>water stream</b>, we used Navier-Stokes to determine the acceleration of the falling particle. \[\frac{\partial u}{\partial t} = -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
@@ -76,7 +76,8 @@
           \[\phi (x_i)\ = \sum_{j} m_j \frac{\phi}{\rho_j} W(x_i - x_j)\] 
           \[\nabla \phi (x_i)\ = \sum_{j} m_j \frac{\phi}{\rho_j}\nabla W(x_i - x_j)\] 
           \[\nabla^2 \phi (x_i)\ = \sum_{j} m_j \frac{\phi_j - \phi_j}{\rho_j} \frac{x_j - x_i}{|x_j - x_i|} \nabla W(x_i - x_j)\]
-          where \(m_j\) is the mass, \(\rho_j\) is the density, and \(x_j\) is the position for a particle j. 
+          where \(m_j\) is the mass, \(\rho_j\) is the density, and \(x_j\) is the position for a particle j. Each of the particles in the sum are the neighboring particles of the current particle i. 
+          We detail our method of neighborhood search in the optimization section below. 
           <p>\(W\) is the kernel function, and \(\nabla W \) is its gradient defined by:</p>
           
           \[W(r,h) =
@@ -106,13 +107,20 @@
     <p>One challenge with this project was ensuring that the simulation calculations were computed quickly. We utilized OpenMP to speed up parallelizable sections
       of the code.</p>
 
-    <p>The Navier Stokes equation requires knowledge of the neighboring particles within a specified neighborhood radius for each particle. Initially we utilized
+    <p>To compute the Navier Stokes equation, we need to determine the neighboring particles within a specified neighboorhood radius for every particle. Initially we utilized
       the CompactNSearch library for neighborhood search, but found that it was too computationally expensive. It would crash our machines if ran in conjunction with 
-      the navier stokes computation. Thinking back to project 4, we looked into devising a spatial hashing approach. However, we found that it would be too inaccurate for 
-      our purposes so we utilized a method from ___.
-    </p>
+      the navier stokes computation. Thinking back to project 4, we looked into devising a spatial hashing approach. We found that it would be too inaccurate for 
+      our purposes to use vanilla spatial hashing from project 4 so we utilized a method from <a href="https://cs.nyu.edu/~jihun/paper/sca2010.pdf">Reconstructing Surfaces of Particle-Based Fluids
+        Using Anisotropic Kernels</a> <b>[2]</b>. The method works by computing an axis aligned bounding box for the ellipsoid associated with each particle. The ellipsoid is 
+        calculated using an anisotropic kernel. The scene space is divided into grid cells (number and size of grid cells determined by a constant parameter). Whichever cells the bounding box intersects 
+        are the ones the particle is mapped to in the spatial hashmap. Our hash functions hashes the grid cell which contains the particle with a linear formula 
+        using large prime coefficients to avoid collisions.</p>
+     <p>   
+        Prior to implementing the ansiotropic kernel and constructing the bounding box, we used a sphere instead of the ellipsoid in order to get something up and running quickly. We computed the distance between 
+        a point and a grid cell to be \[d = \sqrt{\max(0, |x| -1)^2 + \max(0, |y|-1)^2 + \max(0, |z| - 1)^2} \] for a point with coordinates x, y, z. 
+     </p>
 
-
+     <p>Another method we t4ried</p>
 
     <h4 align="middle">Surface Reconstruction</h4>
 
@@ -121,11 +129,24 @@
     </p>
     
     <h3 align="middle"><i>Results</i></h3>
-    <h3 align="middle"><i>References</i></h3>
+    
+    </p>
     <h3 align="middle"><i>Lessons Learned</i></h3>
-
+    <p>It was interesting to take what we learned from the cloth simulation project and expand upon it by implementing ideas from literature. We were able to peek even further behind the layers of abstraction in the 
+      codebase to implement what we wanted. While researching the various methods, we practiced the skill of deciphering papers and gained a deeper understanding of the physics behind how fluids work in the physical world. 
+      We also had to deal with ambiguities in the paper so that we could use the methods in our scenario, which required a lot of communication between the group members. Overall, we learned the complexities that go into creating a 
+      realistic waterfall simulation, especially in the surface reconstruction component. 
+    </p>
     <h3 align="middle"><i>Team Member Contributions</i></h3>
+    <p>Amal Mehta: reading papers to find pertinent information for the project, implementing the optimization components, writing the final report and website.</p>
+    <p>Jason Zou: </p>
+    <p>Jonathan Pan:</p>
+    <p>Srikar Boinapally: </p>
 
+    <h3 align="middle"><i>References</i></h3>
+    <p>[1]: https://www.scitepress.org/papers/2018/68965/68965.pdf</p>
+    <p>[2]: https://cs.nyu.edu/~jihun/paper/sca2010.pdf </p>
+    <p>We started from the project 4 skeleton, which can be found here: <a href="https://github.com/cal-cs184-student/p4-clothsim-sp21-alexbuckley4">Project 4 Skeleton</a></p>
 </body>
 </html>
 
