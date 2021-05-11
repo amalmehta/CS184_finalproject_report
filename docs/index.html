@@ -146,10 +146,13 @@
 
      <!--<p>Another method we tried</p> Jason, you can add the other method here if you want -->
 
+    <h3 align="middle">Problems Encountered</h3>
     <h4 align="middle">Surface Reconstruction</h4>
-
     <p>
-
+      Without GPU optimizations, the runtime of our simulation increases significantly as we increase the number of particles. However, the simulation behaves better and is more visually appealing when we are able to render more particles. As such, we attempted to find a middle ground between runtime and visual appeal by applying a method of particle-to-mesh reconstruction. 
+    </p>
+    <p>
+      Unfortunately, we were unable to get this method to work in time before the project deadline. We suspect that we need to examine the function defining the isosurface a little closer, potentially tweaking the simulation parameters and surface-defining isolevel in order to get better results. 
     </p>
     
     <h3 align="middle"><i>Results</i></h3>
