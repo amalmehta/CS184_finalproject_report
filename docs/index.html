@@ -108,6 +108,15 @@
           \[\frac{\partial u}{\partial t} = -(u \cdot \nabla) u  -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
           
           \[\nabla \cdot u = 0\]
+
+          Vapor density was calculated by:
+
+          \[\rho_v = 1.293*\frac{273.15}{273.15 + T} \frac{p}{1013.25}(1-0.378 \frac{e}{p})\]
+         </p>
+
+         <p>After calculating the accelerations of the particles, we used verlet integration to determine the particle position update equation.
+            \[x_{t+dt} = x_t + (1-d)*(x_t-x_{t-dt})+ a_t*dt^2 \]
+
          </p>
 
     <h4 align="middle">Optimization</h4>
