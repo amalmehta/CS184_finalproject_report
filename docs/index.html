@@ -116,6 +116,9 @@
 
           in order to calculate a particle's pressure at each time step. Although they also suggest to offset this pressure by an initial density, we found that it was less numerically stable in practice then simply using the equation above.
         </p>
+        <p> 
+          To initialize the water stream particles, we had two different but similar methods depending on the type of scene we had. For a simple falling stream, we defined a small 3D rectangle by three finite ranges on the x/y/z axes and randomly initialized the given number of particles within that volume. For a stream falling off a plane to simulate the lip of a waterfall, we similarly initialize particles randomly along a defined volume, except the volume is defined with respect to the basis and normal vectors of a finite plane. Specifically, if \(v_1, v_2, n\) are the two basis vectors and the normal vectors of the finite plane, we draw coefficients \(a,b,c\) randomly from our three ranges to get a random point \(av_1 + bv_2 + cn \).
+        </p>
         <br>
         <p><i>Spray Cloud:</i> When a stream particle hits the basin, we generate a spray cloud particle with a random initial velocity in the reflected direction. For these particles, we update their velocities using a modified Navier-Stokes as is done in [1]:
           
@@ -128,7 +131,7 @@
           \[\rho_v = 1.293*\frac{273.15}{273.15 + T} \frac{p}{1013.25}(1-0.378 \frac{e}{p})\]
          </p>
 
-         <p>After calculating the accelerations of the particles, we used verlet integration to determine the particle position update equation.
+         <p><i>Simulation</i>: To update the particle positions after updating the accelerations of particles, we simply used Verlet Integration as in Project 4.
             \[x_{t+dt} = x_t + (1-d)*(x_t-x_{t-dt})+ a_t*dt^2 \]
 
          </p>
