@@ -68,7 +68,7 @@
     <p>For the simulation, we need to calculate the position of each particle at each time step. 
       The paper <a href="https://www.scitepress.org/papers/2018/68965/68965.pdf">Particle based Waterfall Simulation with Spray Cloud Emerging from
         Basin</a> <b>[1]</b> helped guide the governing equations we used for particle dynamics, and the overall structure of the waterfall. In particular, the 
-      waterfall was divided up into a water stream, splashing spray, and spray cloud. Each of these components had different physical dynamics. </p>
+      waterfall was divided up into a water stream, splashing spray, and spray cloud, each with their own different physical dynamics. In the time frame of this project, we were only able to implement the equations for water stream and spray cloud.</p>
 
         <p>For the <b>water stream</b>, we used Navier-Stokes to determine the acceleration of the falling particle. \[\frac{\partial u}{\partial t} = -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
           Here \(u\) is velocity, \(t\) is time, \(\rho\) is density, \(p\) is pressure, \(v\) is viscosity and \(f\) is external acceleration. \(\nabla p\) represents the force density field due to pressure, \(v \nabla^2 u \) represents the force density field due to viscosity, and \(f\) represents external forces such as gravity, air resistance, or user interaction. In our case, we are simply using gravity. </p>
@@ -79,7 +79,7 @@
             \[\nabla p(x_i) = \sum_{j}m_j\frac{p_i + p_j}{2\rho_j}\nabla W(x_i-x_j, h)\] 
             \[\nabla u^2(x_i) = \sum_{j} m_j \frac{v_j - v_i}{\rho_j} \nabla^2 W(x_i-x_j, h)\]
 
-          As this summation of neighbors for each particle introduces a major computational bottleneck, we detail our method of neighborhood search in the optimization section below. 
+          As this summation of neighbors for each particle introduces a major computational bottleneck, we attempt a method of optimizing neighborhood search which is detailed in the optimization section below. 
           <p>\(W\) corresponds to a kernel smoothing function, of which there are many possible choices. For our project, we use the kernels defined in <b>[2]</b> based on their reported success and popularity, with a slight modification to the gradient kernel based on <b>[3]</b> that we found to produce more numerically stable results for our particular scene setups. </p>
           
           \[W(r,h) =
@@ -100,13 +100,13 @@
                     0, & \text{otherwise}
                     \end{cases}\]                   
 
-          <p>
+         <!--- <p>
           Gravity and air resistance are considered when computing the external acceleration \(f\) and can be computed as:
           \[f = g + \frac{1}{\rho_p V_p}F_{air}\]
           \[F_{air} = \frac{1}{2} \pi (\frac{D_p}{2})^2 \rho_a C_r |u_p| u_p\]
 
           \(g\) is gravity, \(\rho_p\), \(V_p\), \(D_p\), and \(u_p\) are the density, volume, diameter, and velocity of a particle. \(\rho_a\) and \(C_r\) are the density of air 
-          and coefficient of air resistance. </p>
+          and coefficient of air resistance. </p>-->
 
 
         </p>
@@ -149,10 +149,19 @@
     <h3 align="middle">Problems Encountered</h3>
     <h4 align="middle">Surface Reconstruction</h4>
     <p>
-      Without GPU optimizations, the runtime of our simulation increases significantly as we increase the number of particles. However, the simulation behaves better and is more visually appealing when we are able to render more particles. As such, we attempted to find a middle ground between runtime and visual appeal by applying a method of particle-to-mesh reconstruction. 
+      Without GPU optimizations, the runtime of our simulation increases significantly as we increase the number of particles. However, the a particle-based simulation naturally behaves better and generates better visual effects when we are able to render more particles. As such, we attempted to find a middle ground between runtime and visual appeal by leaning on a method of particle-to-mesh reconstruction. Specifically, we attempted to use the original Marching Cubes algorithm <b>[5]</b> (which is referenced by many papers for particle-to-surface reconstruction) to triangulate a mesh of an isosurface based on a three-dimensional scalar field defined by the particle's physical quantities. For the function defining the isosurface, we use the following equation which is also used by <b>[2]</b>:
+
+
+      \[ s(x_i) = \sum_j \frac{m_j}{\rho_j} W(x_i - x_j, h) \]
+
     </p>
     <p>
-      Unfortunately, we were unable to get this method to work in time before the project deadline. We suspect that we need to examine the function defining the isosurface a little closer, potentially tweaking the simulation parameters and surface-defining isolevel in order to get better results. 
+      Unfortunately, we were unable to get this method to work in time before the project deadline. We suspect that we need to examine the function defining the isosurface a little closer, potentially tweaking the simulation parameters and surface-defining isolevel in order to get better results using this particular function. Alternatively, there may be better isosurface definitions to use, such as that which is described in <b>[4]</b>.
+    </p>
+
+    <h4 align="middle">SPH Implementation and Stability</h4>
+    <p>
+      The description of Navier-Stokes in the waterfall specific reference <b>[1]</b> was slightly ambiguous in terms of implementation, possibly because the intended audience has a greater familiarity with fluid simulations. As such, we turned to many other works in the field of general particle-based fluid simulation such as <b>[2]</b>, <b>[3]</b>, <b>[6]</b>, and <b>[7]</b> to better understand the equations and how others go about implementing them. In these works, the implementations vary in many ways (e.g. the kernel function, the pressure/viscosity dynamics), leading us to experiment with various configurations. Through trial and error, we found that a mix of features from each of these works gave us the best visual effects within the context of our scene, as opposed to the full configuration from any single paper (which would often lead to numeric instability and wild particle trajectories). However, we would have liked to see whether any individual work's full configuration could have been made to work with more time to debug and tweak parameter, so this remains an interesting future line of investigation. 
     </p>
     
     <h3 align="middle"><i>Results</i></h3>
@@ -175,6 +184,9 @@
     <p><b>[2]</b>: https://matthias-research.github.io/pages/publications/sca03.pdf</p>
     <p><b>[3]</b>: https://elrnv.com/cs888/cs888proj.pdf</p>
     <p><b>[4]</b>: https://cs.nyu.edu/~jihun/paper/sca2010.pdf </p>
+    <p><b>[5]</b>: https://web.cs.ucdavis.edu/~ma/ECS177/papers/marching_cubes.pdf</p>
+    <p><b>[6]</b>: https://mmacklin.com/pbf_sig_preprint.pdf</p>
+    <p><b>[7]</b>: https://inside.mines.edu/~jpaone/papers/realTimeFluidSimulation.pdf</p>
     <p>We started from the project 4 skeleton, which can be found here: <a href="https://github.com/cal-cs184-student/p4-clothsim-sp21-alexbuckley4">Project 4 Skeleton</a></p>
 </body>
 </html>
