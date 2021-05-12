@@ -67,7 +67,7 @@
     <h4 align="middle">Smoothed Particle Hydrodynamics (SPH) </h4>
     <p>In implementing proper particle dynamics for water, we used the paper <a href="https://www.scitepress.org/papers/2018/68965/68965.pdf">Particle based Waterfall Simulation with Spray Cloud Emerging from Basin</a> <b>[1]</b> as a guide. Their approach divides the waterfall up into a main water stream, splashing spray particles, and spray cloud particles, each with their own dynamics. In the time frame of this project, we were only able to implement the equations for water stream and spray cloud.</p>
         <br>
-        <p><i>Water Stream:</i> For these particles, we used Navier-Stokes to determine their acceleration. \[\frac{\partial u}{\partial t} = -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
+        <p><i><b>Water Stream:</b></i> For these particles, we used Navier-Stokes to determine their acceleration. \[\frac{\partial u}{\partial t} = -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
           Here \(u\) is velocity, \(t\) is time, \(\rho\) is density, \(p\) is pressure, \(v\) is viscosity and \(f\) is external acceleration. \(\nabla p\) represents the force density field due to pressure, \(v \nabla^2 u \) represents the force density field due to viscosity, and \(f\) represents external forces such as gravity, air resistance, or user interaction. In our case, we are simply using gravity. </p>
 
         <p>As part of SPH, each physical quanitity (i.e. density, pressure field, viscosity field) corresponding to an individual particle varies with time based on its neighbouring particles. The equations we use to calculate them follows <b>[2]</b>, which includes slight modifications to the traditional SPH quantity updates in order to make the forces symmetrical. These are defined as follows, where <i>j</i> denotes a neighboring particle of <i>i</i>:
@@ -120,7 +120,18 @@
           To initialize the water stream particles, we had two different but similar methods depending on the type of scene we had. For a simple falling stream, we defined a small 3D rectangle by three finite ranges on the x/y/z axes and randomly initialized the given number of particles within that volume. For a stream falling off a plane to simulate the lip of a waterfall, we similarly initialize particles randomly along a defined volume, except the volume is defined with respect to the basis and normal vectors of a finite plane. Specifically, if \(v_1, v_2, n\) are the two basis vectors and the normal vectors of the finite plane, we draw coefficients \(a,b,c\) randomly from our three ranges to get a random point \(av_1 + bv_2 + cn \).
         </p>
         <br>
-        <p><i>Spray Cloud:</i> When a stream particle hits the basin, we generate a spray cloud particle with a random initial velocity in the reflected direction. For these particles, we update their velocities using a modified Navier-Stokes as is done in [1]:
+
+
+        <p><i><b>Splashing Spray: </b></i>When a stream particle hits an object or the basin, it can turns into a splashing spray particle to generate the "splash" effect of water interacting with objects. The inital velocity of the 
+                                  splashing spray particle is the same value as that of colliding particle. We calculate additional forces to add to the external accelation used in Navier Stokes. </p>
+        <p>\[F_r +F_b = \rho_p \frac{\pi}{6} D_p^3 \frac{\partial u_p}{dt} \]
+           \[F_r = \frac{1}{2} \pi \frac{D_p}{2}^2 \rho_a C_r |u_a - u_p| (u_a - u_p)\] 
+           \[F_b = (\rho_p - \rho_a) \frac{\pi D_p^3}{6}g\] 
+           \(\rho_a \) and \(u_a \) are the desnity and velocity of air.
+        </p>
+
+
+        <p><i><b>Spray Cloud:</b></i> When a stream particle hits the basin, we generate a spray cloud particle with a random initial speed in the reflected direction. For these particles, we update their velocities using a modified Navier-Stokes as is done in <b>[1]</b>:
           
           \[\frac{\partial u}{\partial t} = -(u \cdot \nabla) u  -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
           
@@ -150,7 +161,7 @@
         using large prime coefficients to avoid collisions.</p>
      <p>   
         Prior to implementing the ansiotropic kernel and constructing the bounding box, we used a sphere instead of the ellipsoid in order to get something up and running quickly. We computed the distance between 
-        a point and a grid cell to be \[d = \sqrt{\max(0, |x| -1)^2 + \max(0, |y|-1)^2 + \max(0, |z| - 1)^2} \] for a point with coordinates \(x\), \(y\), \(z\). 
+        an external point and a grid cell to be \[d = \sqrt{\max(0, |x| -1)^2 + \max(0, |y|-1)^2 + \max(0, |z| - 1)^2} \] for a point with coordinates \(x\), \(y\), \(z\). 
      </p>
 
      <!--<p>Another method we tried</p> Jason, you can add the other method here if you want -->
@@ -181,7 +192,7 @@
 
     </p>
     <h3 align="middle"><i>Team Member Contributions</i></h3>
-    <p>Amal Mehta: reading papers to find pertinent information for the project, implementing the optimization components, writing the final report and website.</p>
+    <p>Amal Mehta: reading papers to find pertinent navier stokes and spatial hashing information, implementing the optimization components (spatial hashing, OpenMP), generating deliverables (creating slides, writing the final report and website).</p>
     <p>Jason Zou: implementing Navier-Stokes for main water stream, reading papers to debug the Navier-Stokes implementation, implementing different methods of particle initialization, integrating OpenMP, helping out with the spatial hashing implementation, adding functionality to the interactive simulation GUI, writing the final report/website.</p>
     <p>Jonathan Pan:</p>
     <p>Srikar Boinapally: </p>
