@@ -57,11 +57,22 @@
     <h1 align="middle">CS184: Computer Graphics and Imaging, Spring 2021</h1>
     <h1 align="middle">Final Project: Waterfall Simulation</h1>
     <h3 align="middle">Amal Mehta, Jason Zou, Jonathan Pan, Srikar Boinapally </h2>
-
+      <div align="middle">	
+        <table align="middle">
+            <tr align="middle">
+              <td align="middle">
+                <img src="images/sphere waterfall.png" width=500px>
+                <figcaption>Waterfall on boulders with 20000 particles</figcaption>
+              </td>
+            </tr>
+          </table>
+      </div>  
     <h3 align="middle"><i>Abstract</i></h3>
       <p>Simulating waterfalls accurately is a challenging technical task, but can produce aesthetically pleasing results. Waterfall simulations can add to the user experience in gaming and VR/AR applications. The technical tasks and contributions for this waterfall simulation involved implementing physics equations from 
         literature to calculate particle positions, optimizing simulation calculations, scene generation, and surface reconstruction. In the end we generated several different types of waterfall scenes with varied number of particles and objects.
       </p>
+
+      
       
     <h3 align="middle"><i>Technical Approach</i></h3>
     <p>We used the Project 4 codebase as a starting point because it was nice to have an existing class hierarchy and GUI setup. From there, we updated the simulator and pointmass classes to implement the physics described below. </p>
@@ -202,11 +213,11 @@
        </video>
         <figcaption align="middle">Waterfall with 1000 Water Stream Particles</figcaption>
 
+    </div> 
+
     <p>
       Our waterfall consists of three components: The Water Stream, Splashing Spray, and Spray Cloud. To illustrate what purpose each component serves, we have generated several videos which only render one or two of these components at a time.   
     </p>
-
-    </div> 
 
     <div align="center">
         <video controls="controls" width="600" height="400"
@@ -279,17 +290,6 @@
 
     </div> 
 
-
-    <div align="center">
-        <video controls="controls" width="600" height="400"
-       name="Video Name" id = "vid1" src="images/gravityonly.mp4">
-         
-       </video>
-        <figcaption align="middle">Waterfall with gravity only</figcaption>
-
-
-
-    </div> 
 
 
     <script type="text/javascript">
