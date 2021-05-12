@@ -77,7 +77,7 @@
     <h3 align="middle"><i>Technical Approach</i></h3>
     <p>We used the Project 4 codebase as a starting point because it was nice to have an existing class hierarchy and GUI setup. From there, we updated the simulator and pointmass classes to implement the physics described below. </p>
     <h4 align="middle">Smoothed Particle Hydrodynamics (SPH) </h4>
-    <p>In implementing proper particle dynamics for water, we used the paper <a href="https://www.scitepress.org/papers/2018/68965/68965.pdf">Particle based Waterfall Simulation with Spray Cloud Emerging from Basin</a> <b>[1]</b> as a guide. Their approach divides the waterfall up into a main water stream, splashing spray particles, and spray cloud particles, each with their own dynamics. In the time frame of this project, we were only able to implement the equations for water stream and spray cloud.</p>
+    <p>In implementing proper particle dynamics for water, we used the paper <a href="https://www.scitepress.org/papers/2018/68965/68965.pdf">Particle based Waterfall Simulation with Spray Cloud Emerging from Basin</a> <b>[1]</b> as a guide. Their approach divides the waterfall up into a main water stream, splashing spray particles, and spray cloud particles, each with their own dynamics. We implemented all three of these.</p>
         <br>
         <p><i><b>Water Stream:</b></i> For these particles, we used Navier-Stokes to determine their acceleration. \[\frac{\partial u}{\partial t} = -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
           Here \(u\) is velocity, \(t\) is time, \(\rho\) is density, \(p\) is pressure, \(v\) is viscosity and \(f\) is external acceleration. \(\nabla p\) represents the force density field due to pressure, \(v \nabla^2 u \) represents the force density field due to viscosity, and \(f\) represents external forces such as gravity, air resistance, or user interaction. In our case, we are simply using gravity. </p>
@@ -86,7 +86,7 @@
 
           \[\rho(x_i) = \sum_{j} m_jW(x_i-x_j, h)\]
             \[\nabla p(x_i) = \sum_{j}m_j\frac{p_i + p_j}{2\rho_j}\nabla W(x_i-x_j, h)\] 
-            \[\nabla^2 u(x_i) = \sum_{j} m_j \frac{u_j - u_i}{\rho_j} \nabla^2 W(x_i-x_j, h)\]
+            \[\nabla^2 u(x_i) = \sum_{j} m_j \frac{u_j - u_i}{\rho_j} \nabla^2 W(x_i-x_j, h)\]f
 
           The first equation should be evaluated before the latter two because of the dependence on density. As this summation of neighbors for each particle introduces a major computational bottleneck, we optimize neighborhood search as detailed in the optimization section below. 
           <p>\(W\) corresponds to a kernel smoothing function, of which there are many possible choices. For our project, we use the kernels defined in <b>[2]</b> based on their reported success and popularity, with a slight modification to the gradient kernel based on <b>[3]</b> that we found to produce more numerically stable results for our particular scene setups. </p>
@@ -134,16 +134,15 @@
         <br>
 
 
-        <p><i><b>Splashing Spray: </b></i>When a stream particle hits an object or the basin, it can turns into a splashing spray particle to generate the "splash" effect of water interacting with objects. The inital velocity of the 
-                                  splashing spray particle is the same value as that of colliding particle. We calculate additional forces to add to the external accelation used in Navier Stokes. </p>
+        <p><i><b>Splashing Spray: </b></i>When a particle in the water stream is "isolated" from the rest of the water stream, with some random probability, we create a splashing spray particle in its place. The inital velocity of the splashing spray particle is the same value as that of the isolated particle. We calculate additional forces to add to the external accelation used in Navier Stokes. </p>
         <p>\[F_r +F_b = \rho_p \frac{\pi}{6} D_p^3 \frac{\partial u_p}{dt} \]
            \[F_r = \frac{1}{2} \pi \frac{D_p}{2}^2 \rho_a C_r |u_a - u_p| (u_a - u_p)\] 
            \[F_b = (\rho_p - \rho_a) \frac{\pi D_p^3}{6}g\] 
-           \(\rho_a \) and \(u_a \) are the desnity and velocity of air.
+           \(\rho_a \) and \(u_a \) are the density and velocity of air.
         </p>
 
 
-        <p><i><b>Spray Cloud:</b></i> When a stream particle hits the basin, we generate a spray cloud particle with a random initial speed in the reflected direction. For these particles, we update their velocities using a modified Navier-Stokes as is done in <b>[1]</b>:
+        <p><i><b>Spray Cloud:</b></i> When a stream particle hits the basin, we generate a spray cloud particle travelling in the reflected direction of the original, with random noise added to the initial velocity. We add random noice to the velocity, because we felt that without it, the spray cloud looked very rigid.  For these particles, we update their velocities using a modified Navier-Stokes as is done in <b>[1]</b>:
           
           \[\frac{\partial u}{\partial t} = -(u \cdot \nabla) u  -\frac{1}{\rho}\nabla p + v\nabla^2 u + f \]
           
@@ -203,7 +202,9 @@
     
 
     <p>
-        In our simulation, we initialize 1000 water stream particles that fall off an invisible object. After each particle hits the ground below, it is reset to a starting position at the top of the simulation. This gives us the illusion of water constantly flowing into the scene without having to continuously create new particles. As the simulation progresses, spray cloud and splashing spray particles are added and removed as described in our section above. While the number of water stream particles is held constant at 1000, because of how spray cloud and splashing spray particles are created, the actual number of particles in our simulation at any given time step is around 2-3x more.
+        In our simulation, we initialize either 1000 or 3000 water stream particles that fall off an invisible object. After each particle hits the ground below, it is reset to a starting position at the top of the simulation. This gives us the illusion of water constantly flowing into the scene without having to continuously create new particles. As the simulation progresses, spray cloud and splashing spray particles are added and removed as described in our section above. While the number of water stream particles is held constant at 1000, because of how spray cloud and splashing spray particles are created, the actual number of particles in our simulation at any given time step is around 2-3x more.
+
+        In our simulation, the water stream is rendered in blue, and the splashing spray and spray cloud are rendered in white.
     </p>
 
     <div align="center">
