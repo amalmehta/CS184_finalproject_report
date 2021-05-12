@@ -187,7 +187,13 @@
     
     <h3 align="middle"><i>Results</i></h3>
 
-    <h2 align="middle">Video</h2>
+
+
+    
+
+    <p>
+        In our simulation, we initialize 1000 water stream particles that fall off an invisible object. After each particle hits the ground below, it is reset to a starting position at the top of the simulation. This gives us the illusion of water constantly flowing into the scene without having to continuously create new particles. As the simulation progresses, spray cloud and splashing spray particles are added and removed as described in our section above. While the number of water stream particles is held constant at 1000, because of how spray cloud and splashing spray particles are created, the actual number of particles in our simulation at any given time step is around 2-3x more.
+    </p>
 
     <div align="center">
         <video controls="controls" width="600" height="400"
@@ -196,7 +202,9 @@
        </video>
         <figcaption align="middle">Waterfall with 1000 Water Stream Particles</figcaption>
 
-
+    <p>
+      Our waterfall consists of three components: The Water Stream, Splashing Spray, and Spray Cloud. To illustrate what purpose each component serves, we have generated several videos which only render one or two of these components at a time.   
+    </p>
 
     </div> 
 
@@ -244,11 +252,53 @@
 
     </div> 
 
+     <p>
+      In the above video, we set the viscosity of our fluid to be much greater than that of water. As a result, the fluid clumps together much more, as is commonly observed in highly viscous fluids.  
+    </p>
+
+    <div align="center">
+        <video controls="controls" width="600" height="400"
+       name="Video Name" id = "vid1" src="images/stream_splash.mp4">
+         
+       </video>
+        <figcaption align="middle">Splashing Spray + Water Stream</figcaption>
+
+
+
+    </div> 
+
+
+    <div align="center">
+        <video controls="controls" width="600" height="400"
+       name="Video Name" id = "vid1" src="images/stream_cloud.mp4">
+         
+       </video>
+        <figcaption align="middle">Spray Cloud + Water Stream</figcaption>
+
+
+
+    </div> 
+
+
+    <div align="center">
+        <video controls="controls" width="600" height="400"
+       name="Video Name" id = "vid1" src="images/gravityonly.mp4">
+         
+       </video>
+        <figcaption align="middle">Waterfall with gravity only</figcaption>
+
+
+
+    </div> 
+
+
     <script type="text/javascript">
     /* play video twice as fast */
     document.getElementById("vid1").defaultPlaybackRate = 3.0;
    
     </script>
+
+    <h2 align="middle">Video</h2>
     
     </p>
     <h3 align="middle"><i>Lessons Learned</i></h3>
